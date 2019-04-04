@@ -10,9 +10,13 @@ duplicated values;Error$;1 234 -12 14 234;list_ok.txt
 duplicated values;Error$;1 234 -0 14 234 +0;list_ok.txt
 overflow;Error$;1 234 -12 2147483648 234;list_ok.txt
 overflow;Error$;1 234 -12 -2147483649 234;list_ok.txt
-no args;OK$;;list_ok.txt
-only spaces;OK$;     ;list_ok.txt
+no args;;;list_ok.txt
 valid args, one newline;Error$;1 2 3 4;one_newline.txt
 valid args, one newline;Error$;1 2 3 4;two_newlines_after_valid_action.txt
+valid args, valid action without newline;Error$;1 2 3 4;valid_action_no_newline.txt
+valid args, valid actions with zeros;Error$;1 2 3 4;zeros_between_valid_actions.txt
+valid args, valid actions with garbage;Error$;1 2 3 4;valid_action_zero_garbage.txt
 valid args, no actions;OK$;1 2 3;empty_list.txt
 valid args, no actions;OK$;-12344 -1 +0 234 +999;empty_list.txt
+valid args, ra;OK$;3 1 2;ra.txt
+valid args, rra;OK$;2 3 1;rra.txt
