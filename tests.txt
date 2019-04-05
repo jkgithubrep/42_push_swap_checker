@@ -1,9 +1,13 @@
 non numeric arg;Error$;a;list_ok.txt
-non numeric arg;Error$;-;list_ok.txt
-non numeric arg;Error$;+;list_ok.txt
+non numeric arg;Error$;- 23;list_ok.txt
+non numeric arg;Error$;+ 42;list_ok.txt
 non numeric arg;Error$;2 1 -;list_ok.txt
 non numeric arg;Error$;2 1 +;list_ok.txt
 non numeric arg;Error$;--;list_ok.txt
+non numeric arg;Error$;-1-;list_ok.txt
+non numeric arg;Error$;-1-23 6;list_ok.txt
+non numeric arg;Error$;-10+2 3;list_ok.txt
+non numeric arg;Error$;10+2 9;list_ok.txt
 non numeric arg;Error$;0 1 2 3 4 123a;list_ok.txt
 duplicated values;Error$;0 1 2 3 4 0;list_ok.txt
 duplicated values;Error$;1 234 -12 14 234;list_ok.txt
