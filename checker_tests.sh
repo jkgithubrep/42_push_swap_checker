@@ -16,6 +16,11 @@ BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
 
+print_header ()
+{
+	printf "\n>>> %s <<<\n\n" "$1"
+}
+
 debug(){
 	printf "%s: %s\n" "test_name" "$1"
 	printf "%s: %s\n" "expected" "$2"
@@ -23,7 +28,6 @@ debug(){
 	printf "%s: %s\n" "actions" "$4"
 	printf "%s: %s\n" "index" "$5"
 }
-
 
 nb_of_leaks(){
 	valgrind ./$EXEC_NAME $1 < $ACTIONS_FILES_PATH/$2 > /dev/null 2> $VALGRIND_OUT_FILE
@@ -110,4 +114,5 @@ if [ "$#" -ne 0 ];then
 	ALL=false
 fi
 
+print_header "CHECKER TESTS"
 launch_tests
