@@ -13,6 +13,16 @@ BLUE='\033[1;34m'
 MAGENTA='\033[1;35m'
 NC='\033[0m'
 
+# Print error message
+print_error(){
+	printf "${RED}%s${NC}\n" "$1"
+}
+
+# Print message ok
+print_ok(){
+	printf "${GREEN}%s${NC}\n" "$1"
+}
+
 print_header ()
 {
 	printf "\n>>> %s <<<\n\n" "$1"
@@ -25,16 +35,12 @@ random_nbr_list ()
 
 launch_tests() {
 	print_header "PUSH_SWAP TESTS"
-	printf "Inputs:\n"
-	printf " • nb of tests = %s\n" $1
-	printf " • lowest value = %s\n" $2
-	printf " • highest value = %s\n" $3
-	printf " • nb of elements = %s\n\n" $4
 	[ -f $TEMP_FILE ] && rm -f $TEMP_FILE
 	local index=0
 	local sum=0
 	local max=0
 	local min=10000000
+	local nb_fail=0
 	while [ "$index" -lt "$1" ];
 	do
 		printf "> Test %03d:" $((index + 1)) | tee -a $TEMP_FILE
@@ -49,16 +55,26 @@ launch_tests() {
 			[ "$nb_instr" -lt "$min" ] && min="$nb_instr"
 			[ "$nb_instr" -gt "$max" ] && max="$nb_instr"
 		else
+			((nb_fail++))
 			printf " ❌ "
 		fi
 		printf "\n"
 		((index++))
 	done
 	local average=`echo "$sum/$index" | bc`
-	printf "\n%s\n" "SUMMARY:"
+	printf "\n%s\n\n" "SUMMARY:"
+	printf "> Inputs:\n"
+	printf "  • nb of tests = %s\n" $1
+	printf "  • lowest value = %s\n" $2
+	printf "  • highest value = %s\n" $3
+	printf "  • nb of elements = %s\n\n" $4
+	printf "> Results:\n"
 	printf "  • Average = %d\n" "$average"
 	printf "  • Min = %d\n" "$min"
 	printf "  • Max = %d\n" "$max"
+	if [ "$nb_fail" -gt 0 ]; then
+		print_error "$nb_fail test(s) failed"
+	fi
 }
 
 display_usage(){
