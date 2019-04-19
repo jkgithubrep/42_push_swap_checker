@@ -1,3 +1,7 @@
+#!/bin/sh
+#### Description: check various things for push_swap
+#### Written by: jkettani
+
 # -------- VARIABLES -------- 
 
 TEMP_FILE=push_swap.tmp
@@ -24,16 +28,19 @@ print_ok(){
 	printf "${GREEN}%s${NC}\n" "$1"
 }
 
+# Print header
 print_header ()
 {
 	printf ">>> %s <<<\n\n" "$1"
 }
 
+# Generate a list of ${3} random numbers between an upper ${2} and lower ${1} bound
 random_nbr_list ()
 {
 	seq ${1} ${2} | shuf -n ${3} | tr '\n' ' ' | sed 's/ $//'
 }
 
+# Check input values used to generate the random list of numbers
 check_bounds ()
 {
 	if [ ${1} -gt 999999 ] || [ ${1} -lt -999999 ] || [ ${1} -gt 999999 ] || [ ${1} -lt -999999 ]; then
@@ -49,6 +56,7 @@ check_bounds ()
 	return 0
 }
 
+# Estimate execution time (in seconds)
 estimate_exec_time(){
 	local timer_start=`gdate +%s%N`
 	local nums=`random_nbr_list "$2" "$3" "$4"`
@@ -56,45 +64,46 @@ estimate_exec_time(){
 	local nb_instr=`./push_swap $nums 2> /dev/null | wc -l | bc`
 	local timer_end=`gdate +%s%N`
 	local timer_res=$(((timer_end - timer_start)/1000000))
-	local total_exec_time=`echo "($timer_res * $1)/1000" | bc`
+	local total_exec_time=`echo "scale=3; ($timer_res * $1)/1000" | bc`
 	echo $total_exec_time
 }
 
-build_bar (){
-	local size=$1
-	local count=0
-	while [ $count -lt $size ];
-	do
-		printf "${GREEN}▓"
-		((count++))
-	done
-}
-
+# Display a progress bar based on the execution time given as argument (in seconds)
 progress_bar (){
 	local exec_time=${1}
-	local bar_size=50
-	local count=0
-	if [ $exec_time -eq 0 ]; then
-		return 1
-	elif [ $exec_time -le $bar_size ]; then
-		local interval=`echo "$bar_size / $exec_time" | bc`
-	else
-		interval=1
-	fi
-	while [ "$count" -lt "$1" ];
-	do
-		local bar=`build_bar $interval`
-		printf "%s" $bar
-		sleep 1
-		((count++))
-	done
+	printf "Estimated duration: ${GREEN}%.3f${NC} second(s)\n\n" $exec_time
+	local sleep_time=`echo "scale=3; $exec_time/10" | bc`
+	printf "[ .................................................. ] 0%%\r"
+	sleep $sleep_time
+	printf "[ ${GREEN}▓▓▓▓▓${NC}............................................. ] 10%%\r"
+	sleep $sleep_time
+	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓${NC}........................................ ] 20%%\r"
+	sleep $sleep_time
+	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}................................... ] 30%%\r"
+	sleep $sleep_time
+	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}.............................. ] 40%%\r"
+	sleep $sleep_time
+	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}......................... ] 50%%\r"
+	sleep $sleep_time
+	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}.................... ] 60%%\r"
+	sleep $sleep_time
+	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}............... ] 70%%\r"
+	sleep $sleep_time
+	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}.......... ] 80%%\r"
+	sleep $sleep_time
+	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}..... ] 90%%\r"
+	sleep $sleep_time
+	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC} ] 100%%\r"
 	printf "${NC}\n\n"
 }
 
 launch_tests() {
 	print_header "PUSH_SWAP TESTS"
+	printf "Estimate execution duration...\n"
 	exec_time=`estimate_exec_time ${1} ${2} ${3} ${4}`
 	progress_bar $exec_time &
+	local progress_bar_pid=$!
+	trap 'kill $progress_bar_pid; exit' SIGINT
 	[ -f $TEMP_FILE ] && rm -f $TEMP_FILE
 	local index=0
 	local sum=0
@@ -123,6 +132,7 @@ launch_tests() {
 		((index++))
 	done
 	local average=`echo "$sum/$index" | bc`
+	wait $progress_bar_pid
 	printf "> Inputs:\n"
 	printf "  • nb of tests = %s\n" $1
 	printf "  • lowest value = %s\n" $2
@@ -173,6 +183,7 @@ parse_args(){
 ARGS="$@"
 ALL=false
 CHECKER=false
+PRINT=false
 NB_OF_TESTS=100
 LOW=-2000
 HIGH=2000
