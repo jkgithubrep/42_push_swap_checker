@@ -26,7 +26,7 @@ print_ok(){
 
 print_header ()
 {
-	printf "\n>>> %s <<<\n\n" "$1"
+	printf ">>> %s <<<\n\n" "$1"
 }
 
 random_nbr_list ()
@@ -49,8 +49,52 @@ check_bounds ()
 	return 0
 }
 
+estimate_exec_time(){
+	local timer_start=`gdate +%s%N`
+	local nums=`random_nbr_list "$2" "$3" "$4"`
+	local res=`./push_swap $nums 2> /dev/null | ./checker $nums 2> /dev/null | cat -e`
+	local nb_instr=`./push_swap $nums 2> /dev/null | wc -l | bc`
+	local timer_end=`gdate +%s%N`
+	local timer_res=$(((timer_end - timer_start)/1000000))
+	local total_exec_time=`echo "($timer_res * $1)/1000" | bc`
+	echo $total_exec_time
+}
+
+build_bar (){
+	local size=$1
+	local count=0
+	while [ $count -lt $size ];
+	do
+		printf "${GREEN}▓"
+		((count++))
+	done
+}
+
+progress_bar (){
+	local exec_time=${1}
+	local bar_size=50
+	local count=0
+	if [ $exec_time -eq 0 ]; then
+		return 1
+	elif [ $exec_time -le $bar_size ]; then
+		local interval=`echo "$bar_size / $exec_time" | bc`
+	else
+		interval=1
+	fi
+	while [ "$count" -lt "$1" ];
+	do
+		local bar=`build_bar $interval`
+		printf "%s" $bar
+		sleep 1
+		((count++))
+	done
+	printf "${NC}\n\n"
+}
+
 launch_tests() {
 	print_header "PUSH_SWAP TESTS"
+	exec_time=`estimate_exec_time ${1} ${2} ${3} ${4}`
+	progress_bar $exec_time &
 	[ -f $TEMP_FILE ] && rm -f $TEMP_FILE
 	local index=0
 	local sum=0
@@ -59,26 +103,26 @@ launch_tests() {
 	local nb_fail=0
 	while [ "$index" -lt "$1" ];
 	do
-		printf "> Test %03d:" $((index + 1)) | tee -a $TEMP_FILE
+#		printf "> Test %03d:" $((index + 1)) | tee -a $TEMP_FILE
 		local nums=`random_nbr_list "$2" "$3" "$4"`
-		printf " %s\n" "$nums" >> $TEMP_FILE
+#		printf " %s\n" "$nums" >> $TEMP_FILE
 		res=`./push_swap $nums 2> /dev/null | ./checker $nums 2> /dev/null | cat -e`
 		if [ "$res" = "OK$" ]; then
-			printf " ✅ "
+#			printf " ✅ "
 			local nb_instr=`./push_swap $nums 2> /dev/null | wc -l | bc`
 			sum=$((sum + nb_instr))
-			printf " - $nb_instr"
+#			printf " - $nb_instr"
 			[ "$nb_instr" -lt "$min" ] && min="$nb_instr"
 			[ "$nb_instr" -gt "$max" ] && max="$nb_instr"
 		else
 			((nb_fail++))
-			printf " ❌ "
+#			printf " ❌ "
 		fi
-		printf "\n"
+#		printf "\n"
+#		[ "$index" -eq 0 ] && echo "total time = $total_exec_time second(s)"
 		((index++))
 	done
 	local average=`echo "$sum/$index" | bc`
-	printf "\n%s\n\n" "SUMMARY:"
 	printf "> Inputs:\n"
 	printf "  • nb of tests = %s\n" $1
 	printf "  • lowest value = %s\n" $2
@@ -126,15 +170,6 @@ parse_args(){
 	NB_ELM="$4"
 }
 
-progress_bar (){
-	printf "${GREEN}▓▓▓▓▓                    ${NC}(33%%)\r"
-	sleep 1
-	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓            ${NC}(66%%)\r"
-	sleep 1
-	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ${NC}(100%%)\r"
-	printf "\n"
-}
-
 ARGS="$@"
 ALL=false
 CHECKER=false
@@ -152,8 +187,6 @@ if $ALL || $CHECKER; then
 	fi
 	sh $CHECKER_SCRIPT_NAME
 fi
-
-#progress_bar
 
 if $ALL; then
 	launch_tests $NB_OF_TESTS $LOW $HIGH $NB_ELM
