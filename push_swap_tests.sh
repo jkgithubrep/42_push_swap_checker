@@ -8,6 +8,7 @@ CHECKER_SCRIPT=$CHECKER_PATH/$CHECKER_SCRIPT_NAME
 # Colors
 RED='\033[1;31m'
 GREEN='\033[1;32m'
+GREEN_BG='\033[1;32;42m'
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 MAGENTA='\033[1;35m'
@@ -31,6 +32,21 @@ print_header ()
 random_nbr_list ()
 {
 	seq ${1} ${2} | shuf -n ${3} | tr '\n' ' ' | sed 's/ $//'
+}
+
+check_bounds ()
+{
+	if [ ${1} -gt 999999 ] || [ ${1} -lt -999999 ] || [ ${1} -gt 999999 ] || [ ${1} -lt -999999 ]; then
+		print_error "Error: choose numbers between -999999 and 999999 for the upper and lower bound"
+		exit
+	elif [ ${1} -gt ${2} ]; then
+		print_error "Error: lower bound (${1}) superior to upper bound (${2})"
+		exit
+	elif [ ${3} -gt `echo "${2} - ${1}" | bc` ]; then
+		print_error "Error: interval between upper (${2}) and lower (${1}) bound to small to countain ${3} values"
+		exit
+	fi
+	return 0
 }
 
 launch_tests() {
@@ -73,7 +89,7 @@ launch_tests() {
 	printf "  • Min = %d\n" "$min"
 	printf "  • Max = %d\n" "$max"
 	if [ "$nb_fail" -gt 0 ]; then
-		print_error "$nb_fail test(s) failed"
+		print_error "\n$nb_fail test(s) failed"
 	fi
 }
 
@@ -110,6 +126,15 @@ parse_args(){
 	NB_ELM="$4"
 }
 
+progress_bar (){
+	printf "${GREEN}▓▓▓▓▓                    ${NC}(33%%)\r"
+	sleep 1
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓            ${NC}(66%%)\r"
+	sleep 1
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ ${NC}(100%%)\r"
+	printf "\n"
+}
+
 ARGS="$@"
 ALL=false
 CHECKER=false
@@ -128,10 +153,13 @@ if $ALL || $CHECKER; then
 	sh $CHECKER_SCRIPT_NAME
 fi
 
+#progress_bar
+
 if $ALL; then
 	launch_tests $NB_OF_TESTS $LOW $HIGH $NB_ELM
 	NB_ELM=500
 	launch_tests $NB_OF_TESTS $LOW $HIGH $NB_ELM
 elif ! $NO_ARGS; then
+	check_bounds $LOW $HIGH $NB_ELM
 	launch_tests $NB_OF_TESTS $LOW $HIGH $NB_ELM
 fi
