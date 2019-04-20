@@ -22,6 +22,8 @@ BLUE='\033[1;34m'
 MAGENTA='\033[1;35m'
 NC='\033[0m'
 
+# -------- FUNCTIONS -------- 
+
 # Print error message
 print_error(){
 	printf "${RED}%s${NC}\n" "$1"
@@ -44,9 +46,8 @@ random_nbr_list ()
 	seq ${1} ${2} | shuf -n ${3} | tr '\n' ' ' | sed 's/ $//'
 }
 
-
 nb_of_leaks(){
-	valgrind --leak-check=full $PROJECT_PATH/$PUSH_SWAP_EXEC $1 > /dev/null 2> $VALGRIND_TMP_FILE
+	valgrind $PROJECT_PATH/$PUSH_SWAP_EXEC $1 > /dev/null 2> $VALGRIND_TMP_FILE
 	local nb_leaks=`cat -v $VALGRIND_TMP_FILE | grep 'definitely lost' | tr -s " " | cut -d' ' -f4 | bc`
 	rm -f $VALGRIND_TMP_FILE
 	echo $nb_leaks
@@ -111,6 +112,7 @@ launch_tests() {
 	local max=0
 	local min=10000000
 	local nb_fail=0
+	local has_leaks=false
 	while [ "$index" -lt "$1" ];
 	do
 		if $VERBOSE; then
@@ -126,8 +128,9 @@ launch_tests() {
 			if $LEAKS; then
 				local nb_of_leaks=`nb_of_leaks $nums`
 				if [ "$nb_of_leaks" -ne 0 ]; then
-					printf " - leaks ?"
-					printf "${RED} ✗ ($nb_of_leaks)${NC}\n"
+					has_leaks=true
+					$VERBOSE && printf " - leaks ?"
+					$VERBOSE && printf "${RED} ✗ ($nb_of_leaks)${NC}\n"
 				fi
 			fi
 			local nb_instr=`$PROJECT_PATH/push_swap $nums 2> /dev/null | wc -l | bc`
@@ -153,15 +156,20 @@ launch_tests() {
 	printf "  ⤷ Average: ${YELLOW}%d${NC}\n" "$average"
 	printf "  ⤷ Min: ${YELLOW}%d${NC}\n" "$min"
 	printf "  ⤷ Max: ${YELLOW}%d${NC}\n" "$max"
-	if [ "$nb_fail" -gt 0 ]; then
-		print_error "\n$nb_fail test(s) failed"
+	if $LEAKS; then
+		printf "  ⤷ Leaks:"
+		$has_leaks && printf " ${RED}yes${NC}\n" || printf " ${GREEN}no${NC}\n"
 	fi
+	if [ "$nb_fail" -gt 0 ]; then
+		print_error "\n➞ $nb_fail test(s) failed"
+	fi
+	printf "\n"
 }
 
 display_usage(){
-	printf "Usage: ./push_swap_checker.sh [options] nb_of_tests lower_bound upper_bound nb_of_elm\n"
+	printf "Usage: sh push_swap_tests.sh [options] nb_of_tests lower_bound upper_bound nb_of_elm\n"
 	printf "Example:\n"
-	printf "%s\n" " ./push_swap_checker.sh -c 150 -200 200 100"
+	printf "%s\n" " sh push_swap_tests.sh -c 150 -200 200 100"
 	printf "%s\n" "      > test checker"
 	printf "%s\n" "      > run 150 different tests with generated lists of 100 random numbers between -200 and 200"
 	printf "Options:\n"

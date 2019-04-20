@@ -1,6 +1,11 @@
+#!/bin/sh
+#### Description: check various things for push_swap
+#### Written by: jkettani
+
 # -------- VARIABLES -------- 
 
 PROJECT_PATH=../push_swap
+
 CHECKER_EXEC=checker
 OUT_FILE=test_out.tmp
 VALGRIND_OUT_FILE=valgrind.tmp
@@ -14,6 +19,8 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 MAGENTA='\033[1;35m'
 NC='\033[0m'
+
+# -------- FUNCTIONS -------- 
 
 print_header ()
 {
@@ -29,7 +36,7 @@ debug(){
 }
 
 nb_of_leaks(){
-	valgrind --leak-check=full $PROJECT_PATH/$CHECKER_EXEC $1 < $ACTIONS_FILES_PATH/$2 > /dev/null 2> $VALGRIND_OUT_FILE
+	valgrind $PROJECT_PATH/$CHECKER_EXEC $1 < $ACTIONS_FILES_PATH/$2 > /dev/null 2> $VALGRIND_OUT_FILE
 	local nb_leaks=`cat -v $VALGRIND_OUT_FILE | grep 'definitely lost' | tr -s " " | cut -d' ' -f4 | bc`
 	rm -f $VALGRIND_OUT_FILE
 	echo $nb_leaks
@@ -38,7 +45,7 @@ nb_of_leaks(){
 launch_test(){
 	printf "> Test %03d:" $5
 	if [ "$2" = "Error$" ]; then
-		$PROJECT_PATH/$CHECKER_EXEC $3 >/dev/null 2> $OUT_FILE < $ACTIONS_FILES_PATH/$4
+		$PROJECT_PATH/$CHECKER_EXEC $3 > /dev/null 2> $OUT_FILE < $ACTIONS_FILES_PATH/$4
 	else
 		$PROJECT_PATH/$CHECKER_EXEC $3 2> /dev/null > $OUT_FILE < $ACTIONS_FILES_PATH/$4
 	fi
@@ -89,13 +96,14 @@ launch_tests(){
 		shift
 		((index++))
 	done < $TESTS_FILE
+	printf "\n"
 	rm -f $OUT_FILE
 }
 
 check_args(){
 	while [ "$#" -gt 0 ];
 	do
-		if ! echo $1 | grep -E -q '^[0-9-][0-9]*$'; then
+		if ! echo $1 | grep -E -q '^[0-9]+$'; then
 			return 0
 		fi
 		shift
@@ -103,11 +111,19 @@ check_args(){
 	return 1
 }
 
+display_usage(){
+	printf "Usage: sh checker_tests.sh [tests numbers]\n"
+	printf "Example:\n"
+	printf "%s\n" " sh checker_tests.sh 1 4 5"
+	printf "%s\n" "      > run checker only for tests n°1, n°4 and n°5"
+	exit
+}
+
 ALL=true
 ARGS="$@"
 
 if check_args $ARGS; then
-	exit
+	display_usage
 fi
 
 if [ "$#" -ne 0 ];then
