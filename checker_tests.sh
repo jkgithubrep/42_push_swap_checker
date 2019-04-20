@@ -1,11 +1,10 @@
 # -------- VARIABLES -------- 
 
-EXEC_NAME=checker
+PROJECT_PATH=../push_swap
+CHECKER_EXEC=checker
 OUT_FILE=out.tmp
 VALGRIND_OUT_FILE=valgrind.tmp
-CHECKER_PATH=../push_swap_checker
-TESTS_PATH=$CHECKER_PATH
-ACTIONS_FILES_PATH=$CHECKER_PATH/actions_files
+ACTIONS_FILES_PATH=./actions_files
 TESTS_FILE=tests.txt
 
 # Colors
@@ -30,7 +29,7 @@ debug(){
 }
 
 nb_of_leaks(){
-	valgrind ./$EXEC_NAME $1 < $ACTIONS_FILES_PATH/$2 > /dev/null 2> $VALGRIND_OUT_FILE
+	valgrind --leak-check=full $PROJECT_PATH/$CHECKER_EXEC $1 < $ACTIONS_FILES_PATH/$2 > /dev/null 2> $VALGRIND_OUT_FILE
 	local nb_leaks=`cat -v $VALGRIND_OUT_FILE | grep 'definitely lost' | tr -s " " | cut -d' ' -f4 | bc`
 	rm -f $VALGRIND_OUT_FILE
 	echo $nb_leaks
@@ -39,9 +38,9 @@ nb_of_leaks(){
 launch_test(){
 	printf "> Test %03d:" $5
 	if [ "$2" = "Error$" ]; then
-		./$EXEC_NAME $3 >/dev/null 2> $OUT_FILE < $ACTIONS_FILES_PATH/$4
+		$PROJECT_PATH/$CHECKER_EXEC $3 >/dev/null 2> $OUT_FILE < $ACTIONS_FILES_PATH/$4
 	else
-		./$EXEC_NAME $3 2> /dev/null > $OUT_FILE < $ACTIONS_FILES_PATH/$4
+		$PROJECT_PATH/$CHECKER_EXEC $3 2> /dev/null > $OUT_FILE < $ACTIONS_FILES_PATH/$4
 	fi
 	if [ "`cat -e $OUT_FILE`" = "$2" ]; then
 		printf " ✅ "
@@ -50,7 +49,7 @@ launch_test(){
 	fi
 	printf " - leaks ?"
 	local nb_of_leaks=`nb_of_leaks "$3" "$4"`
-	if [ $nb_of_leaks -ne 0 ]; then
+	if [ "$nb_of_leaks" -ne 0 ]; then
 		printf "${RED} ✗ ($nb_of_leaks)${NC}"
 	else
 		printf "${GREEN} ✔${NC}"
@@ -88,7 +87,7 @@ launch_tests(){
 		fi
 		shift
 		((index++))
-	done < $TESTS_PATH/$TESTS_FILE
+	done < $TESTS_FILE
 	rm -f $OUT_FILE
 }
 

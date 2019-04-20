@@ -4,8 +4,12 @@
 
 # -------- VARIABLES -------- 
 
+PROJECT_PATH=../push_swap
+PUSH_SWAP_EXEC=push_swap
+CHECKER_EXEC=checker
 TEMP_FILE=push_swap.tmp
-CHECKER_PATH=../push_swap_checker
+VALGRIND_TMP_FILE=valgrind.tmp
+CHECKER_PATH=.
 CHECKER_SCRIPT_NAME=checker_tests.sh
 CHECKER_SCRIPT=$CHECKER_PATH/$CHECKER_SCRIPT_NAME
 
@@ -31,7 +35,7 @@ print_ok(){
 # Print header
 print_header ()
 {
-	printf ">>> %s <<<\n\n" "$1"
+	printf "\n>>> %s <<<\n\n" "$1"
 }
 
 # Generate a list of ${3} random numbers between an upper ${2} and lower ${1} bound
@@ -40,28 +44,23 @@ random_nbr_list ()
 	seq ${1} ${2} | shuf -n ${3} | tr '\n' ' ' | sed 's/ $//'
 }
 
-# Check input values used to generate the random list of numbers
-check_bounds ()
-{
-	if [ ${1} -gt 999999 ] || [ ${1} -lt -999999 ] || [ ${1} -gt 999999 ] || [ ${1} -lt -999999 ]; then
-		print_error "Error: choose numbers between -999999 and 999999 for the upper and lower bound"
-		exit
-	elif [ ${1} -gt ${2} ]; then
-		print_error "Error: lower bound (${1}) superior to upper bound (${2})"
-		exit
-	elif [ ${3} -gt `echo "${2} - ${1}" | bc` ]; then
-		print_error "Error: interval between upper (${2}) and lower (${1}) bound to small to countain ${3} values"
-		exit
-	fi
-	return 0
+
+nb_of_leaks(){
+	valgrind --leak-check=full $PROJECT_PATH/$PUSH_SWAP_EXEC $1 > /dev/null 2> $VALGRIND_TMP_FILE
+	local nb_leaks=`cat -v $VALGRIND_TMP_FILE | grep 'definitely lost' | tr -s " " | cut -d' ' -f4 | bc`
+	rm -f $VALGRIND_TMP_FILE
+	echo $nb_leaks
 }
 
 # Estimate execution time (in seconds)
 estimate_exec_time(){
 	local timer_start=`gdate +%s%N`
 	local nums=`random_nbr_list "$2" "$3" "$4"`
-	local res=`./push_swap $nums 2> /dev/null | ./checker $nums 2> /dev/null | cat -e`
-	local nb_instr=`./push_swap $nums 2> /dev/null | wc -l | bc`
+	local res=`$PROJECT_PATH/push_swap $nums 2> /dev/null | $PROJECT_PATH/checker $nums 2> /dev/null | cat -e`
+	if $LEAKS; then
+		nb_leaks=`nb_of_leaks $nums`
+	fi
+	local nb_instr=`$PROJECT_PATH/push_swap $nums 2> /dev/null | wc -l | bc`
 	local timer_end=`gdate +%s%N`
 	local timer_res=$(((timer_end - timer_start)/1000000))
 	local total_exec_time=`echo "scale=3; ($timer_res * $1)/1000" | bc`
@@ -71,39 +70,41 @@ estimate_exec_time(){
 # Display a progress bar based on the execution time given as argument (in seconds)
 progress_bar (){
 	local exec_time=${1}
-	printf "Estimated duration: ${GREEN}%.3f${NC} second(s)\n\n" $exec_time
 	local sleep_time=`echo "scale=3; $exec_time/10" | bc`
-	printf "[ .................................................. ] 0%%\r"
+	printf ".................................................. 0%%\r"
 	sleep $sleep_time
-	printf "[ ${GREEN}▓▓▓▓▓${NC}............................................. ] 10%%\r"
+	printf "${GREEN}▓▓▓▓▓${NC}............................................. 10%%\r"
 	sleep $sleep_time
-	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓${NC}........................................ ] 20%%\r"
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓${NC}........................................ 20%%\r"
 	sleep $sleep_time
-	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}................................... ] 30%%\r"
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}................................... 30%%\r"
 	sleep $sleep_time
-	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}.............................. ] 40%%\r"
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}.............................. 40%%\r"
 	sleep $sleep_time
-	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}......................... ] 50%%\r"
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}......................... 50%%\r"
 	sleep $sleep_time
-	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}.................... ] 60%%\r"
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}.................... 60%%\r"
 	sleep $sleep_time
-	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}............... ] 70%%\r"
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}............... 70%%\r"
 	sleep $sleep_time
-	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}.......... ] 80%%\r"
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}.......... 80%%\r"
 	sleep $sleep_time
-	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}..... ] 90%%\r"
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC}..... 90%%\r"
 	sleep $sleep_time
-	printf "[ ${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC} ] 100%%\r"
-	printf "${NC}\n\n"
+	printf "${GREEN}▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓${NC} 100%%\r"
+	printf "${NC}\n"
 }
 
 launch_tests() {
 	print_header "PUSH_SWAP TESTS"
 	printf "Estimate execution duration...\n"
 	exec_time=`estimate_exec_time ${1} ${2} ${3} ${4}`
-	progress_bar $exec_time &
-	local progress_bar_pid=$!
-	trap 'kill $progress_bar_pid; exit' SIGINT
+	printf "Estimated duration: ${GREEN}%.3f${NC} second(s)\n\n" $exec_time
+	if ! $VERBOSE; then
+		progress_bar $exec_time &
+		local progress_bar_pid=$!
+		trap 'kill $progress_bar_pid; exit' SIGINT
+	fi
 	[ -f $TEMP_FILE ] && rm -f $TEMP_FILE
 	local index=0
 	local sum=0
@@ -112,28 +113,38 @@ launch_tests() {
 	local nb_fail=0
 	while [ "$index" -lt "$1" ];
 	do
-#		printf "> Test %03d:" $((index + 1)) | tee -a $TEMP_FILE
+		if $VERBOSE; then
+			printf "⇢  Test %03d:" $((index + 1)) | tee -a $TEMP_FILE
+		else
+			printf "⇢  Test %03d:" $((index + 1)) >> $TEMP_FILE
+		fi
 		local nums=`random_nbr_list "$2" "$3" "$4"`
-#		printf " %s\n" "$nums" >> $TEMP_FILE
-		res=`./push_swap $nums 2> /dev/null | ./checker $nums 2> /dev/null | cat -e`
+		printf " %s\n" "$nums" >> $TEMP_FILE
+		res=`$PROJECT_PATH/push_swap $nums 2> /dev/null | $PROJECT_PATH/checker $nums 2> /dev/null | cat -e`
 		if [ "$res" = "OK$" ]; then
-#			printf " ✅ "
-			local nb_instr=`./push_swap $nums 2> /dev/null | wc -l | bc`
+			$VERBOSE && printf " ✅"
+			if $LEAKS; then
+				local nb_of_leaks=`nb_of_leaks $nums`
+				if [ "$nb_of_leaks" -ne 0 ]; then
+					printf " - leaks ?"
+					printf "${RED} ✗ ($nb_of_leaks)${NC}\n"
+				fi
+			fi
+			local nb_instr=`$PROJECT_PATH/push_swap $nums 2> /dev/null | wc -l | bc`
 			sum=$((sum + nb_instr))
-#			printf " - $nb_instr"
+			$VERBOSE && printf " - $nb_instr"
 			[ "$nb_instr" -lt "$min" ] && min="$nb_instr"
 			[ "$nb_instr" -gt "$max" ] && max="$nb_instr"
 		else
 			((nb_fail++))
-#			printf " ❌ "
+			$VERBOSE && printf " ❌ "
 		fi
-#		printf "\n"
-#		[ "$index" -eq 0 ] && echo "total time = $total_exec_time second(s)"
+		$VERBOSE && printf "\n"
 		((index++))
 	done
 	local average=`echo "$sum/$index" | bc`
 	wait $progress_bar_pid
-	printf "> Inputs:\n"
+	printf "\n> Inputs:\n"
 	printf "  • nb of tests = %s\n" $1
 	printf "  • lowest value = %s\n" $2
 	printf "  • highest value = %s\n" $3
@@ -148,31 +159,65 @@ launch_tests() {
 }
 
 display_usage(){
-	printf "Usage: ./push_swap_checker.sh [option] nb_of_tests low high nb_of_elm\n"
+	printf "Usage: ./push_swap_checker.sh [options] nb_of_tests lower_bound upper_bound nb_of_elm\n"
+	printf "Example:\n"
+	printf "%s\n" " ./push_swap_checker.sh -c 150 -200 200 100"
+	printf "%s\n" "      > test checker"
+	printf "%s\n" "      > run 150 different tests with generated lists of 100 random numbers between -200 and 200"
 	printf "Options:\n"
+	printf "%s\n" " -h, --help                Display usage"
 	printf "%s\n" " -a, --all                 Check everything"
 	printf "%s\n" " -c, --checker             Check checker"
+	printf "%s\n" " -v, --verbose             Print tests"
 	exit
 }
 
-parse_args(){
-	if ([ "$#" -lt 4 ] && [ "$#" -ne 1 ]) || [ "$#" -gt 5 ]; then
-		display_usage
-	fi
-	if [ "$#" -eq 1 ]; then
-		NO_ARGS=true
-	fi
-	if [ "$#" -eq 1 ] || [ "$#" -eq 5 ]; then
-		local option="$1"
-		if [ "$option" = "-a" ] || [ "$option" = "--all" ]; then
-			ALL=true
-			return
-		elif [ "$option" = "-c" ] || [ "$option" = "--checker" ]; then
-			CHECKER=true
-		else
-			display_usage
+args_are_numeric_values(){
+	while [ "$#" -gt 0 ];
+	do
+		if ! echo $1 | grep -E -q '^[0-9]+$'; then
+			return 1
 		fi
 		shift
+	done
+	return 0
+}
+
+is_option(){
+	if [ ${1:0:1} = "-" ] || [ ${1:0:2} == "--" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+parse_args(){
+	if [ $# -eq 0 ]; then
+		display_usage
+	fi
+	if is_option $1; then
+		while is_option $1;
+		do
+			local option="$1"
+			if [ "$option" = "-a" ] || [ "$option" = "--all" ]; then
+				ALL=true
+				return
+			elif [ "$option" = "-h" ] || [ "$option" = "--help" ]; then
+				display_usage
+			elif [ "$option" = "-c" ] || [ "$option" = "--checker" ]; then
+				CHECKER=true
+			elif [ "$option" = "-v" ] || [ "$option" = "--verbose" ]; then
+				VERBOSE=true
+			elif [ "$option" = "-l" ] || [ "$option" = "--leaks" ]; then
+				LEAKS=true
+			else
+				display_usage
+			fi
+			shift
+		done
+	fi
+	if [ $# -ne 4 ]; then
+		display_usage
 	fi
 	NB_OF_TESTS="$1"
 	LOW="$2"
@@ -180,30 +225,120 @@ parse_args(){
 	NB_ELM="$4"
 }
 
+# Check that the commands given as arguments are installed
+check_command_availability(){
+	while [ $# -gt 0 ];
+	do
+		command=`command -v $1`
+		if [ $? -ne 0 ]; then
+			printf "You dont\'t seem to have \`%s\' installed.\n" "$1"
+			if [ "$1" = "shuf" ]; then
+				printf "\`brew install coreutils\' to get it."
+			elif [ "$1" = "gdate" ]; then
+				printf "\`brew install coreutils\' to get it."
+			elif [ "$1" = "valgrind"]; then
+				printf "\`brew install valgrind\' to get it."
+			fi
+			exit 1
+		fi
+		shift
+	done
+	return 0
+}
+
+# Verify that the project has been compiled
+check_executables(){
+	local missing=false
+	if [ ! -f $PROJECT_PATH/$PUSH_SWAP_EXEC ]; then
+		printf "%s\n" "$PUSH_SWAP_EXEC executable is missing."
+		missing=true
+	fi
+	if [ ! -f $PROJECT_PATH/$CHECKER_EXEC ]; then
+		printf "%s\n" "$CHECKER_EXEC executable is missing."
+		missing=true
+	fi
+	if $missing; then
+		local answer=empty
+		while [ "$answer" != "y" ] && [ "$answer" != "n" ];
+		do
+			printf "%s\n" "Would you like to compile the missing executables? (y or n)"
+			read answer
+		done
+		if [ "$answer" = "y" ]; then
+			make -C $PROJECT_PATH
+		else
+			exit
+		fi
+	fi
+	if [ ! -f $PROJECT_PATH/$PUSH_SWAP_EXEC ] || [ ! -f $PROJECT_PATH/$CHECKER_EXEC ]; then
+		printf "%s\n" "Compilation failed"
+		exit
+	fi
+}
+
+# Check input values used to generate the random list of numbers
+check_bounds ()
+{
+	local nb_tests=$1
+	local low=$2
+	local high=$3
+	local nb_elm=$4
+	if [ $nb_tests -eq 0 ]; then
+		print_error "Error: number of tests to run is 0"
+		exit
+	elif [ $low -gt 999999 ] || [ $low -lt -999999 ] || [ $high -gt 999999 ] || [ $high -lt -999999 ]; then
+		print_error "Error: choose numbers between -999999 and 999999 for the upper and lower bound"
+		exit
+	elif [ $low -gt $high ]; then
+		print_error "Error: lower bound ($low) superior to upper bound ($high)"
+		exit
+	elif [ $nb_elm -gt `echo "$high - $low + 1" | bc` ]; then
+		print_error "Error: interval between upper ($high) and lower ($low) bound to small to countain $nb_elm values"
+		exit
+	fi
+	return 0
+}
+
 ARGS="$@"
 ALL=false
 CHECKER=false
-PRINT=false
+VERBOSE=false
+LEAKS=false
 NB_OF_TESTS=100
-LOW=-2000
-HIGH=2000
+LOW=-1000
+HIGH=1000
 NB_ELM=100
 NO_ARGS=false
 
+check_command_availability "shuf" "gdate"
+
 parse_args $ARGS
 
+if $ALL || $CHECKER || $LEAKS; then
+	check_command_availability "valgrind"
+fi
+
+if $LEAKS; then
+	printf "${YELLOW}%s${NC}\n" "Warning: leaks flag selected, this will increase the duration of the tests"
+	sleep 1
+fi
+
+if ! args_are_numeric_values $NB_OF_TESTS $LOW $HIGH $NB_ELM; then
+	display_usage
+fi
+
+check_executables
+
 if $ALL || $CHECKER; then
-	if [ ! -f $CHECKER_SCRIPT_NAME ]; then 
-		ln -s $CHECKER_SCRIPT
-	fi
 	sh $CHECKER_SCRIPT_NAME
 fi
 
 if $ALL; then
 	launch_tests $NB_OF_TESTS $LOW $HIGH $NB_ELM
+	NB_OF_TESTS=20
 	NB_ELM=500
 	launch_tests $NB_OF_TESTS $LOW $HIGH $NB_ELM
-elif ! $NO_ARGS; then
-	check_bounds $LOW $HIGH $NB_ELM
+else
+	check_bounds $NB_OF_TESTS $LOW $HIGH $NB_ELM
 	launch_tests $NB_OF_TESTS $LOW $HIGH $NB_ELM
 fi
