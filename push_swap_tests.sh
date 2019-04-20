@@ -175,7 +175,7 @@ display_usage(){
 args_are_numeric_values(){
 	while [ "$#" -gt 0 ];
 	do
-		if ! echo $1 | grep -E -q '^[0-9]+$'; then
+		if ! echo $1 | grep -E -q '^[0-9-][0-9]*$'; then
 			return 1
 		fi
 		shift

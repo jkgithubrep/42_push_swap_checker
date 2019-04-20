@@ -2,7 +2,7 @@
 
 PROJECT_PATH=../push_swap
 CHECKER_EXEC=checker
-OUT_FILE=out.tmp
+OUT_FILE=test_out.tmp
 VALGRIND_OUT_FILE=valgrind.tmp
 ACTIONS_FILES_PATH=./actions_files
 TESTS_FILE=tests.txt
@@ -47,6 +47,7 @@ launch_test(){
 	else
 		printf " ❌ "
 	fi
+	rm -f $OUT_FILE
 	printf " - leaks ?"
 	local nb_of_leaks=`nb_of_leaks "$3" "$4"`
 	if [ "$nb_of_leaks" -ne 0 ]; then
@@ -94,7 +95,7 @@ launch_tests(){
 check_args(){
 	while [ "$#" -gt 0 ];
 	do
-		if ! echo $1 | grep -E -q '^[0-9]+$'; then
+		if ! echo $1 | grep -E -q '^[0-9-][0-9]*$'; then
 			return 0
 		fi
 		shift
