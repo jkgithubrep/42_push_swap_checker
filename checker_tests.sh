@@ -8,16 +8,16 @@ ACTIONS_FILES_PATH=./actions_files
 TESTS_FILE=tests.txt
 
 # Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+MAGENTA='\033[1;35m'
 NC='\033[0m'
 
 print_header ()
 {
-	printf "\n>>> %s <<<\n\n" "$1"
+	printf "\n====== ${BLUE}%s${NC} ======\n\n" "$1"
 }
 
 debug(){

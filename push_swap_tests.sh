@@ -35,7 +35,7 @@ print_ok(){
 # Print header
 print_header ()
 {
-	printf "\n>>> %s <<<\n\n" "$1"
+	printf "\n====== ${BLUE}%s${NC} ======\n\n" "$1"
 }
 
 # Generate a list of ${3} random numbers between an upper ${2} and lower ${1} bound
@@ -144,15 +144,15 @@ launch_tests() {
 	done
 	local average=`echo "$sum/$index" | bc`
 	wait $progress_bar_pid
-	printf "\n> Inputs:\n"
-	printf "  • nb of tests = %s\n" $1
-	printf "  • lowest value = %s\n" $2
-	printf "  • highest value = %s\n" $3
-	printf "  • nb of elements = %s\n\n" $4
-	printf "> Results:\n"
-	printf "  • Average = %d\n" "$average"
-	printf "  • Min = %d\n" "$min"
-	printf "  • Max = %d\n" "$max"
+	printf "\nInputs\n"
+	printf "  → nb of tests: %s\n" $1
+	printf "  → lowest value: %s\n" $2
+	printf "  → highest value: %s\n" $3
+	printf "  → nb of elements: %s\n\n" $4
+	printf "Results\n"
+	printf "  ⤷ Average: ${YELLOW}%d${NC}\n" "$average"
+	printf "  ⤷ Min: ${YELLOW}%d${NC}\n" "$min"
+	printf "  ⤷ Max: ${YELLOW}%d${NC}\n" "$max"
 	if [ "$nb_fail" -gt 0 ]; then
 		print_error "\n$nb_fail test(s) failed"
 	fi
