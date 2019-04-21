@@ -19,7 +19,7 @@ Change the path to you push_swap project at the top of both scripts.
 ### Checker
 
 The **checker_tests.sh** script will run different tests stored in the *tests.txt* file with the following format:
-`test description;expected output;arguments;name of the file with instructions`
+```test description;expected output;arguments;name of the file with instructions```
 Each line corresponds to a specific test. You can select which tests to run by adding their (line) number as argument (see usage below).
 
 Example:
@@ -60,7 +60,7 @@ Example:
 
 **_>Output_**:
 
-![Checker output](images/checker_output.txt)
+![Checker output](images/checker_output.png)
 
 ### Push_swap
 
@@ -82,7 +82,7 @@ Options:
 
 **_>Output_**:
 
-![Push_swap output](images/push_swap_output.txt)
+![Push_swap output](images/push_swap_output.png)
 
 ## Issues
 
