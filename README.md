@@ -11,6 +11,7 @@ Scripts to check various things for the *push_swap* project at [42](https://www.
 2) Change the path to you push_swap project at the top of both scripts.
 
 ![Path](images/path.png)
+
 3)`sh checker_tests` or `sh push_swap_tests [options] nb_of_tests_to_run lower_bound higher_bound nb_of_elements`
 
 ## Usage
@@ -25,9 +26,11 @@ Each line corresponds to a specific test. You can select which tests to run by a
 
 Example:
 ```
+$ cat tests.txt
 non numeric arg;Error$;0 1 2 3 4 123a;list_ok.txt
 duplicated values;Error$;0 1 2 3 4 0;list_ok.txt
 overflow;Error$;1 234 -12 2147483648 234;list_ok.txt
+...
 ```
 
 The files with different lists of instructions are stored in the *actions_files* folder:
