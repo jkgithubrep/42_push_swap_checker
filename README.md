@@ -19,7 +19,9 @@ Change the path to you push_swap project at the top of both scripts.
 ### Checker
 
 The **checker_tests.sh** script will run different tests stored in the *tests.txt* file with the following format:
-```test description;expected output;arguments;name of the file with instructions```
+```
+test description;expected output;arguments;name of the file with instructions
+```
 Each line corresponds to a specific test. You can select which tests to run by adding their (line) number as argument (see usage below).
 
 Example:
@@ -64,7 +66,7 @@ Example:
 
 ### Push_swap
 
-The **push_swap_tests.sh** scripts tests the performance of your push_swap program, byrunning a user-defined number of tests, with three parameters: lower bound, upper boudn and number of elements. Several options are also available (see usage below).
+The **push_swap_tests.sh** script tests the performance of your push_swap program, by running a user-defined number of tests, with three parameters: lower bound, upper boudn and number of elements. Several options are also available (see usage below).
 
 ```
 Usage: ./push_swap_tests.sh [options] nb_of_tests lower_bound upper_bound nb_of_elm
