@@ -12,7 +12,7 @@ Scripts to check various things for the *push_swap* project at [42](https://www.
 
 ![Path](images/path.png)
 
-3)`sh checker_tests` or `sh push_swap_tests [options] nb_of_tests_to_run lower_bound higher_bound nb_of_elements`
+3) `sh checker_tests` or `sh push_swap_tests [options] nb_of_tests_to_run lower_bound higher_bound nb_of_elements`
 
 ## Usage
 
@@ -62,7 +62,7 @@ Example:
        > run checker only for tests n°1, n°4 and n°5
 ```
 
-**_>Output_**:
+**_> Output_**:
 
 ![Checker output](images/checker_output.png)
 
@@ -84,7 +84,7 @@ Options:
  -l, --leaks               Check leaks
 ```
 
-**_>Output_**:
+**_> Output_**:
 
 ![Push_swap output](images/push_swap_output.png)
 
@@ -97,3 +97,4 @@ If you encounter any issue, you can contact me on slack (jkettani) or by email: 
 
 by **jkettani**
 
+Checker output visual inspired by [knows-be](https://github.com/ksnow-be/push_swap_checker)
