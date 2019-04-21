@@ -10,11 +10,46 @@ Scripts to check various things for the *push_swap* project at [42](https://www.
 git clone https://github.com/jkgithubrep/42_push_swap_checker.git
 ```
 
-Change the path to you push_swap project at the top of both scripts
+Change the path to you push_swap project at the top of both scripts.
+
+![Path](images/path.png)
 
 ## Usage
 
 ### Checker
+
+The **checker_tests.sh** script will run different tests stored in the *tests.txt* file with the following format:
+`test description;expected output;arguments;name of the file with instructions`
+Each line corresponds to a specific test. You can select which tests to run by adding their (line) number as argument (see usage below).
+
+Example:
+```
+non numeric arg;Error$;0 1 2 3 4 123a;list_ok.txt
+duplicated values;Error$;0 1 2 3 4 0;list_ok.txt
+overflow;Error$;1 234 -12 2147483648 234;list_ok.txt
+```
+
+The files with different lists of instructions are stored in the *actions_files* folder:
+```
+$ cat actions_files/list_ok.txt
+sa
+sa
+ra
+pb
+pb
+pb
+ss
+sb
+pb
+rb
+rrb
+rb
+rb
+pa
+pa
+rra
+rrr
+```
 
 ```
 Usage: sh checker_tests.sh [tests numbers]
@@ -23,7 +58,13 @@ Example:
        > run checker only for tests n°1, n°4 and n°5
 ```
 
+**_>Output_**:
+
+![Checker output](images/checker_output.txt)
+
 ### Push_swap
+
+The **push_swap_tests.sh** scripts tests the performance of your push_swap program, byrunning a user-defined number of tests, with three parameters: lower bound, upper boudn and number of elements. Several options are also available (see usage below).
 
 ```
 Usage: ./push_swap_tests.sh [options] nb_of_tests lower_bound upper_bound nb_of_elm
@@ -38,6 +79,10 @@ Options:
  -v, --verbose             Print tests
  -l, --leaks               Check leaks
 ```
+
+**_>Output_**:
+
+![Push_swap output](images/push_swap_output.txt)
 
 ## Issues
 
