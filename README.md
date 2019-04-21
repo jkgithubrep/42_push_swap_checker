@@ -6,13 +6,12 @@ Scripts to check various things for the *push_swap* project at [42](https://www.
 
 ## Getting started
 
-```
-git clone https://github.com/jkgithubrep/42_push_swap_checker.git
-```
 
-Change the path to you push_swap project at the top of both scripts.
+1) `git clone https://github.com/jkgithubrep/42_push_swap_checker.git`
+2) Change the path to you push_swap project at the top of both scripts.
 
 ![Path](images/path.png)
+3)`sh checker_tests` or `sh push_swap_tests [options] nb_of_tests_to_run lower_bound higher_bound nb_of_elements`
 
 ## Usage
 
