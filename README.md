@@ -68,7 +68,7 @@ Example:
 
 ### Push_swap
 
-The **push_swap_tests.sh** script tests the performance of your push_swap program, by running a user-defined number of tests, with three parameters: lower bound, upper boudn and number of elements. Several options are also available (see usage below).
+The **push_swap_tests.sh** script tests the performance of your push_swap program, by running a user-defined number of tests, with three parameters: lower bound, upper bound and number of elements. Several options are also available (see usage below).
 
 ```
 Usage: ./push_swap_tests.sh [options] nb_of_tests lower_bound upper_bound nb_of_elm
@@ -97,4 +97,4 @@ If you encounter any issue, you can contact me on slack (jkettani) or by email: 
 
 by **jkettani**
 
-Checker output visual inspired by [knows-be](https://github.com/ksnow-be/push_swap_checker)
+Checker output visual inspired by [knows-be](https://github.com/ksnow-be/push_swap_checker). 
