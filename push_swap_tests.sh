@@ -96,6 +96,11 @@ progress_bar (){
 	printf "${NC}\n"
 }
 
+print_test() {
+	index_rfmt=`printf "%03d" $1`
+	grep "Test $index_rfmt" $TEMP_FILE | cut -d ':' -f 2 | cut -c 2-
+}
+
 launch_tests() {
 	print_header "PUSH_SWAP TESTS"
 	printf "Estimate execution duration...\n"
@@ -110,6 +115,8 @@ launch_tests() {
 	local index=0
 	local sum=0
 	local max=0
+	local min_index=0
+	local max_index=0
 	local min=10000000
 	local nb_fail=0
 	local has_leaks=false
@@ -136,8 +143,8 @@ launch_tests() {
 			local nb_instr=`$PROJECT_PATH/push_swap $nums 2> /dev/null | wc -l | bc`
 			sum=$((sum + nb_instr))
 			$VERBOSE && printf " - $nb_instr"
-			[ "$nb_instr" -lt "$min" ] && min="$nb_instr"
-			[ "$nb_instr" -gt "$max" ] && max="$nb_instr"
+			[ "$nb_instr" -lt "$min" ] && min="$nb_instr" && min_index="$((index + 1))"
+			[ "$nb_instr" -gt "$max" ] && max="$nb_instr" && max_index="$((index + 1))"
 		else
 			((nb_fail++))
 			$VERBOSE && printf " ❌ "
@@ -156,6 +163,10 @@ launch_tests() {
 	printf "  ⤷ Average: ${YELLOW}%d${NC}\n" "$average"
 	printf "  ⤷ Min: ${YELLOW}%d${NC}\n" "$min"
 	printf "  ⤷ Max: ${YELLOW}%d${NC}\n" "$max"
+	printf "  ⤷ Worst case:\n"
+	print_test $max_index
+	printf "  ⤷ Best case:\n"
+	print_test $min_index
 	if $LEAKS; then
 		printf "  ⤷ Leaks:"
 		$has_leaks && printf " ${RED}yes${NC}\n" || printf " ${GREEN}no${NC}\n"
