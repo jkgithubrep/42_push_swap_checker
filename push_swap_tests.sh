@@ -253,11 +253,11 @@ check_command_availability(){
 		if [ $? -ne 0 ]; then
 			printf "You dont\'t seem to have \`%s\' installed.\n" "$1"
 			if [ "$1" = "shuf" ]; then
-				printf "\`brew install coreutils\' to get it."
+				printf "\`brew install coreutils\' to get it.\n"
 			elif [ "$1" = "gdate" ]; then
-				printf "\`brew install coreutils\' to get it."
+				printf "\`brew install coreutils\' to get it.\n"
 			elif [ "$1" = "valgrind"]; then
-				printf "\`brew install valgrind\' to get it."
+				printf "\`brew install valgrind\' to get it.\n"
 			fi
 			exit 1
 		fi
