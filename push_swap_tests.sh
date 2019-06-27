@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #### Description: check various things for push_swap
 #### Written by: jkettani
 
@@ -161,7 +161,8 @@ launch_tests() {
 		$has_leaks && printf " ${RED}yes${NC}\n" || printf " ${GREEN}no${NC}\n"
 	fi
 	if [ "$nb_fail" -gt 0 ]; then
-		print_error "\n➞ $nb_fail test(s) failed"
+		printf "\n"
+		print_error "➞ $nb_fail test(s) failed"
 	fi
 	printf "\n"
 }

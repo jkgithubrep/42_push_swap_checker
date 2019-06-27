@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #### Description: check various things for push_swap
 #### Written by: jkettani
 
